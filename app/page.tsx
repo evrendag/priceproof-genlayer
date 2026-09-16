@@ -2,21 +2,24 @@
 import {useMemo,useState} from "react";
 import {BadgeCheck,ExternalLink,Link2,Loader2,ReceiptText,Scale,ShieldCheck,Wallet} from "lucide-react";
 import {createClient} from "genlayer-js";
-import {studionet} from "genlayer-js/chains";
 import {TransactionStatus} from "genlayer-js/types";
+import {GENLAYER_CHAIN} from "../lib/genlayer/network";
+import {useGenLayerTransactionKit} from "../lib/genlayer/kit";
 declare global{interface Window{ethereum?:{request(args:{method:string;params?:unknown[]}):Promise<unknown>}}}
 // Studio Next / GenLayer Testnet (chain ID 61997).
 // The environment variable remains supported for alternate deployments.
 const DEFAULT_CONTRACT=process.env.NEXT_PUBLIC_CONTRACT_ADDRESS??"0x89f972F5E8D015E4fFDF49739cC6da3fB8b9D578";
-const readClient=createClient({chain:studionet});
+const readClient=createClient({chain:GENLAYER_CHAIN});
 type Receipt={verdict?:string;primary_gap?:string;score?:number|bigint;evidence_quality?:string;observed_current_minor?:number|bigint;observed_reference_minor?:number|bigint;currency?:string;summary?:string;status?:string};
 export default function Home(){
  const[account,setAccount]=useState(""),[contract,setContract]=useState(DEFAULT_CONTRACT),[merchant,setMerchant]=useState("store.google.com"),[product,setProduct]=useState("Pixel 10 Pro"),[currency,setCurrency]=useState("USD"),[current,setCurrent]=useState("79900"),[reference,setReference]=useState("99900"),[scope,setScope]=useState("All customers in the United States; no membership requirement."),[sources,setSources]=useState(["https://store.google.com/","https://store.google.com/terms"]),[claimId,setClaimId]=useState("0"),[receiptId,setReceiptId]=useState("0");
+ const transactionKit=useGenLayerTransactionKit(account||null);
+ void transactionKit;
  const[receipt,setReceipt]=useState<Receipt|null>(null),[busy,setBusy]=useState(""),[message,setMessage]=useState("Stage an offer, then ask independent validators to inspect the live evidence."),[tx,setTx]=useState("");
  const discount=useMemo(()=>{const a=Number(current),b=Number(reference);return b>a&&b>0?Math.round((b-a)*10000/b):0},[current,reference]),valid=/^0x[a-fA-F0-9]{40}$/.test(contract);
- const wallet=()=>{if(!account||!window.ethereum)throw Error("Connect a wallet first.");return createClient({chain:studionet,account:account as `0x${string}`,provider:window.ethereum as never})};
+ const wallet=()=>{if(!account||!window.ethereum)throw Error("Connect a wallet first.");return createClient({chain:GENLAYER_CHAIN,account:account as `0x${string}`,provider:window.ethereum as never})};
  async function run(name:string,fn:()=>Promise<void>){setBusy(name);try{await fn()}catch(e){setMessage(e instanceof Error?e.message:"Operation failed.")}finally{setBusy("")}}
- async function connect(){const list=await window.ethereum?.request({method:"eth_requestAccounts"}) as string[]|undefined;if(!list?.[0])throw Error("MetaMask is required.");setAccount(list[0]);setMessage("Wallet connected to GenLayer StudioNet.")}
+ async function connect(){const list=await window.ethereum?.request({method:"eth_requestAccounts"}) as string[]|undefined;if(!list?.[0])throw Error("MetaMask is required.");const chainId=await window.ethereum?.request({method:"eth_chainId"}) as string|undefined;if(chainId!=="0xF1CD")throw Error("Please switch MetaMask to GenLayer Studio Next (chain ID 61997).");setAccount(list[0]);setMessage("Wallet connected to GenLayer Studio Next.")}
  async function wait(hash:`0x${string}`){setTx(hash);await readClient.waitForTransactionReceipt({hash,status:TransactionStatus.FINALIZED})}
  async function create(){if(!valid)throw Error("Enter the deployed PRICEPROOF contract address.");const counts=await readClient.readContract({address:contract as `0x${string}`,functionName:"get_counts",args:[]}) as(number|bigint)[];const id=Number(counts[0]);const hash=await wallet().writeContract({address:contract as `0x${string}`,functionName:"create_claim",args:[merchant,product,currency,Number(current),Number(reference),discount,scope,JSON.stringify(sources)],value:0n});setMessage("Claim submitted. Waiting for finalization…");await wait(hash);setClaimId(String(id));setMessage(`Offer #${id} is sealed and ready for audit.`)}
  async function audit(){if(!valid)throw Error("Enter a valid contract address.");const counts=await readClient.readContract({address:contract as `0x${string}`,functionName:"get_counts",args:[]}) as(number|bigint)[];const id=Number(counts[1]);const hash=await wallet().writeContract({address:contract as `0x${string}`,functionName:"audit_claim",args:[Number(claimId)],value:0n});setMessage("Validators are independently checking the live offer…");await wait(hash);setReceiptId(String(id));await load(String(id));setMessage("Consensus finalized the Price Claim Receipt.")}
