@@ -7,7 +7,14 @@ Lifecycle: create claim → consensus audit → ACTIVE, QUALIFIED, REJECTED or M
 
 Files: `contract.py`, `tests/test_priceproof.py`, `app/page.tsx`, `ARCHITECTURE.md`, `SUBMISSION.md`.
 
-The frontend targets GenLayer Studio Next (chain ID `61997`) through the `studionet` chain definition and defaults to the deployed contract `0x89f972F5E8D015E4fFDF49739cC6da3fB8b9D578`. Set `NEXT_PUBLIC_CONTRACT_ADDRESS` to override it for another deployment.
+The frontend targets GenLayer Studio Next (Consensus v0.6):
+
+- RPC: `https://studio-next.genlayer.com/api`
+- Chain ID: `61997`
+- Explorer: `https://explorer-studio-dev.genlayer.com/`
+- Contract: `0x89f972F5E8D015E4fFDF49739cC6da3fB8b9D578`
+
+The frontend uses `genlayer-js@2.0.0-rc.1`, `@genlayer/transaction-kit@0.1.0-rc.2`, and the matching React adapter. Set `NEXT_PUBLIC_CONTRACT_ADDRESS` to override the contract for another deployment.
 
 Reproducible setup:
 
