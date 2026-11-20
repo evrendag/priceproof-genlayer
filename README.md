@@ -12,7 +12,7 @@ The frontend targets GenLayer Studio Next (Consensus v0.6):
 - RPC: `https://studio-next.genlayer.com/api`
 - Chain ID: `61997`
 - Explorer: `https://explorer-studio-dev.genlayer.com/`
-- Contract: `0x9DdF26B06338a8709B7325AdBF4AFa2B7bd90cd5`
+- Contract: `0x273fCAD1A19Ba3B47390FD46016990d924Cd132C`
 
 The frontend uses `genlayer-js@2.0.0-rc.1`, `@genlayer/transaction-kit@0.1.0-rc.2`, and the matching React adapter. Set `NEXT_PUBLIC_CONTRACT_ADDRESS` to override the contract for another deployment.
 
