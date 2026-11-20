@@ -74,7 +74,7 @@ pages require INSUFFICIENT_EVIDENCE. Return minified JSON only:
 {{"verdict":"VERIFIED|PARTIAL|REJECTED|INSUFFICIENT_EVIDENCE",
 "primary_gap":"NONE|PRODUCT|CURRENT_PRICE|REFERENCE_PRICE|PERCENTAGE|PERIOD|SCOPE|STOCK|EVIDENCE",
 "score":0,"evidence_quality":"HIGH|MEDIUM|LOW","observed_current_minor":0,
-"observed_reference_minor":0,"currency":"USD","summary":"one precise sentence"}}
+"observed_reference_minor":0,"currency":"USD","summary":"one precise sentence, max 300 characters"}}
 """
             raw=gl.nondet.exec_prompt(prompt)
             return json.loads(raw) if isinstance(raw,str) else raw
@@ -84,7 +84,7 @@ pages require INSUFFICIENT_EVIDENCE. Return minified JSON only:
             for k in ("score","observed_current_minor","observed_reference_minor"):
                 if not isinstance(d.get(k),int) or d[k]<0:return False
             if d["score"]>100 or not isinstance(d.get("currency"),str) or len(d["currency"])!=3:return False
-            if not isinstance(d.get("summary"),str) or not 20<=len(d["summary"])<=360:return False
+            if not isinstance(d.get("summary"),str) or not 20<=len(d["summary"])<=600:return False
             if d["verdict"]=="VERIFIED":
                 return d["primary_gap"]=="NONE" and d["score"]>=80 and d["evidence_quality"]!="LOW" and d["currency"]==claim.currency and d["observed_current_minor"]==int(claim.current_minor) and d["observed_reference_minor"]==int(claim.reference_minor)
             if d["verdict"]=="PARTIAL": return 45<=d["score"]<=79 and d["primary_gap"] not in ("NONE","EVIDENCE")
