@@ -8,7 +8,7 @@ import {useGenLayerTransactionKit} from "../lib/genlayer/kit";
 declare global{interface Window{ethereum?:{request(args:{method:string;params?:unknown[]}):Promise<unknown>}}}
 // Studio Next / GenLayer Testnet (chain ID 61997).
 // The environment variable remains supported for alternate deployments.
-const DEFAULT_CONTRACT=process.env.NEXT_PUBLIC_CONTRACT_ADDRESS??"0x9DdF26B06338a8709B7325AdBF4AFa2B7bd90cd5";
+const DEFAULT_CONTRACT=process.env.NEXT_PUBLIC_CONTRACT_ADDRESS??"0x273fCAD1A19Ba3B47390FD46016990d924Cd132C";
 const readClient=createClient({chain:GENLAYER_CHAIN});
 type Receipt={verdict?:string;primary_gap?:string;score?:number|bigint;evidence_quality?:string;observed_current_minor?:number|bigint;observed_reference_minor?:number|bigint;currency?:string;summary?:string;status?:string};
 export default function Home(){
