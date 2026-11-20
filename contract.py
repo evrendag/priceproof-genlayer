@@ -52,7 +52,12 @@ class PriceProof(gl.Contract):
             pages=[]
             for i,url in enumerate(urls):
                 try:
-                    body=gl.nondet.web.get(url).body.decode("utf-8",errors="replace")[:7000]
+                    payload=gl.nondet.web.get(url).body
+                    try:
+                        body=payload.decode("utf-8",errors="replace")
+                    except Exception:
+                        body=str(payload)
+                    body=body[:7000]
                 except Exception: body="[UNAVAILABLE]"
                 pages.append("SOURCE %s URL %s\n%s"%(i+1,url,body))
             prompt=f"""
